@@ -86,6 +86,7 @@ public class SSHTunnelTopicListener implements Runnable {
                 StringBuffer buffer = new StringBuffer();
                 while ((c = isr.read()) >= 0) {
                     buffer.append((char) c);
+                    log.debug(c);
                     if (NEW_LINE_CHAR == c) {
                         log.debug("---localproxy--->" + buffer.toString());
                         buffer = new StringBuffer();
