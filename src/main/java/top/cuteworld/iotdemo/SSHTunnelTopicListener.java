@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import software.amazon.awssdk.crt.mqtt.MqttClientConnection;
 import software.amazon.awssdk.crt.mqtt.QualityOfService;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
@@ -80,29 +81,44 @@ public class SSHTunnelTopicListener implements Runnable {
             log.info("command - ");
             log.info(pb.command().stream().reduce((s, s2) -> s + " " + s2));
             Process localProxyProcess = pb.start();
-            try (InputStreamReader isr = new InputStreamReader(localProxyProcess.getInputStream())) {
-                int c;
-
-                StringBuffer buffer = new StringBuffer();
-                while ((c = isr.read()) >= 0) {
-                    buffer.append((char) c);
-                    log.debug(c);
-                    if (NEW_LINE_CHAR == c) {
-                        log.debug("---localproxy--->" + buffer.toString());
-                        buffer = new StringBuffer();
-                    }
-                }
-            }
-
-            try (InputStreamReader isr = new InputStreamReader(localProxyProcess.getErrorStream())) {
-                int c;
-                while ((c = isr.read()) >= 0) {
-                    log.debug("---localproxy error--->" + (char) c);
-                }
-            }
+            logProcess(localProxyProcess);
 
         } catch (Exception e) {
             log.error("Failed to start localproxy by tunnel notify message", e);
         }
+    }
+
+    public static void logProcess(Process localProxyProcess) throws IOException {
+        try (InputStreamReader isr = new InputStreamReader(localProxyProcess.getInputStream())) {
+            int c;
+            StringBuffer buffer = new StringBuffer();
+            while ((c = isr.read()) >= 0) {
+                if (NEW_LINE_CHAR == c) {
+                    log.debug("---localproxy--->>> " + buffer.toString());
+                    buffer = new StringBuffer();
+                } else {
+                    buffer.append((char) c);
+                }
+            }
+        }
+
+        try (InputStreamReader isr = new InputStreamReader(localProxyProcess.getErrorStream())) {
+            int c;
+            StringBuffer buffer = new StringBuffer();
+            while ((c = isr.read()) >= 0) {
+                if (NEW_LINE_CHAR == c) {
+                    log.debug("---localproxy error--->>> " + buffer.toString());
+                    buffer = new StringBuffer();
+                } else {
+                    buffer.append((char) c);
+                }
+            }
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
+        final ProcessBuilder pb = new ProcessBuilder("dig", "www.baidu.com");
+        Process start = pb.start();
+        logProcess(start);
     }
 }
