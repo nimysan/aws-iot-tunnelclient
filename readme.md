@@ -45,23 +45,7 @@ localproxy -t dest_token_generated_by_iot -r ap-southeast-1 -d localhost:22
 
 ![img](img.png)
 
-## 注意
-
-> MQTT over websocket必须使用ak/sk或者sessionToken, 详情见 https://github.com/aws/aws-iot-device-sdk-java#sample-applications
-
-```html
-
-For an MQTT over WebSocket connection, provide these arguments:
-
-    awsAccessKeyId: IAM access key ID
-    awsSecretAccessKey: IAM secret access key
-    sessionToken: (optional) if temporary credentials are used
-
-
-
-```
-
-## 错误分析
+## 错误排查
 
 ### 错误1： 5134: The connection was closed unexpectedly.
 ```bash
