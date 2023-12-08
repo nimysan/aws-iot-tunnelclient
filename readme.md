@@ -28,11 +28,6 @@ mvn clean package
 启动:
 --endpoint a1cw44obfpxk2h-ats.iot.ap-southeast-1.amazonaws.com --client_id sdk-java --topic sdk/test/java --ca_file ../root-CA.crt --cert ../zg_d1.cert.pem --key ../zg_d1.private.key
 
-```bash 
-#scp -i ~/ec2keys/sig.pem target/iottunnelclient-1.0-SNAPSHOT-shaded.jar  ec2-user@54.169.129.200:/tmp
-启动运行:
-java -jar iottunnelclient-1.0-SNAPSHOT-shaded.jar  ats_endpoint thing_name access_key access_secret
-```
 ## 等待Tunnel创建
 
 运行本程序， 然后等待创建tunnel的程序发送指令过来并启动localproxy
