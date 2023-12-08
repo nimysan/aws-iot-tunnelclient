@@ -3,3 +3,6 @@ target/
 *.iml
 *.ipr
 *.iws
+/dependency-reduced-pom.xml
+.idea/vcs.xml
+.idea
