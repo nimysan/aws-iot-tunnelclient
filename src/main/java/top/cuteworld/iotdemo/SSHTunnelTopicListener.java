@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import software.amazon.awssdk.crt.mqtt.MqttClientConnection;
 import software.amazon.awssdk.crt.mqtt.QualityOfService;
 
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 
@@ -72,12 +73,24 @@ public class SSHTunnelTopicListener implements Runnable {
             }
 
             // Start the destination local proxy in a separate process to connect to the SSH Daemon listening port 22
+//            String localproxy_path = System.getenv("localproxy_path");
             final ProcessBuilder pb = new ProcessBuilder("localproxy", "-t", accessToken, "-r", region, "-d", "localhost:22", "-v 5");
             log.info("command - ");
             log.info(pb.command().stream().reduce((s, s2) -> s + " " + s2));
-            pb.start();
-//            InputStream inputStream = process.getInputStream();
+            Process localProxyProcess = pb.start();
+            try (InputStreamReader isr = new InputStreamReader(localProxyProcess.getInputStream())) {
+                int c;
+                while ((c = isr.read()) >= 0) {
+                    log.debug("---localproxy--->" + (char) c);
+                }
+            }
 
+            try (InputStreamReader isr = new InputStreamReader(localProxyProcess.getErrorStream())) {
+                int c;
+                while ((c = isr.read()) >= 0) {
+                    log.debug("---localproxy error--->" + (char) c);
+                }
+            }
 
         } catch (Exception e) {
             log.error("Failed to start localproxy by tunnel notify message", e);
