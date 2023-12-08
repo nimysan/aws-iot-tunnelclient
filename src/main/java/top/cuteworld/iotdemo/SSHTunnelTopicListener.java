@@ -20,6 +20,8 @@ public class SSHTunnelTopicListener implements Runnable {
 
     private static Log log = LogFactory.getLog(SSHTunnelTopicListener.class);
 
+    public static final char NEW_LINE_CHAR = '\n';
+
     private final MqttClientConnection mqttClientConnection;
     private final String thingName;
     private final String tunnelNotificationTopic;
@@ -80,8 +82,14 @@ public class SSHTunnelTopicListener implements Runnable {
             Process localProxyProcess = pb.start();
             try (InputStreamReader isr = new InputStreamReader(localProxyProcess.getInputStream())) {
                 int c;
+
+                StringBuffer buffer = new StringBuffer();
                 while ((c = isr.read()) >= 0) {
-                    log.debug("---localproxy--->" + (char) c);
+                    buffer.append((char) c);
+                    if (NEW_LINE_CHAR == c) {
+                        log.debug("---localproxy--->" + buffer.toString());
+                        buffer = new StringBuffer();
+                    }
                 }
             }
 
