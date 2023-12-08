@@ -1,6 +1,6 @@
 # AWS iot 隧道
 
-本程序是帮助连接iot core并实时监听隧道开启的通知，打开Destination
+本程序是帮助连接iot core并实时监听隧道开启的通知，打开Destination Mode localproxy
 
 >  _一定一定要关闭本机VPN以后再调试_
 
@@ -19,14 +19,13 @@
 
 ```bash
 mvn clean package
-#java -jar target/iottunnelclient-1.0-SNAPSHOT-shaded.jar
 ```
 
 
 ## 复制程序上去
 
 启动:
---endpoint a1cw44obfpxk2h-ats.iot.ap-southeast-1.amazonaws.com --client_id sdk-java --topic sdk/test/java --ca_file ../root-CA.crt --cert ../zg_d1.cert.pem --key ../zg_d1.private.key
+--endpoint a1cw44obfpxk2h-ats.iot.ap-southeast-1.amazonaws.com --client_id sdk-java --topic sdk/test/java --ca_file ../root-CA.crt --cert ../thing.cert.pem --key ../thing.private.key
 
 ## 等待Tunnel创建
 
@@ -41,73 +40,10 @@ localproxy -t dest_token_generated_by_iot -r ap-southeast-1 -d localhost:22
 
 ## 连接
 
->>> 作为Source Connect, 你需要填入的不是source token, 而是正常登录你的目标设备的用户名和密码或者密钥， 比如对于我的ec2, 需要填入的就是ec2-user和xxx.pem
+>>> 请使用目标机器的用户名和密码或者密钥， 比如对于我的ec2, 需要填入的就是ec2-user和xxx.pem
 
 ![img](img.png)
 
-## 错误排查
-
-### 错误1： 5134: The connection was closed unexpectedly.
-```bash
-Connection interrupted: 5134: The connection was closed unexpectedly.
-java.util.concurrent.ExecutionException: software.amazon.awssdk.crt.mqtt.MqttException: Old requests from the previous session are cancelled, and offline request will not be accept.
-	at java.base/java.util.concurrent.CompletableFuture.reportGet(CompletableFuture.java:395)
-	at java.base/java.util.concurrent.CompletableFuture.get(CompletableFuture.java:1999)
-	at top.cuteworld.iotdemo.SSHTunnelTopicListener.run(SSHTunnelRunnable.java:33)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: software.amazon.awssdk.crt.mqtt.MqttException: Old requests from the previous session are cancelled, and offline request will not be accept.
-Connection resumed: clean session
-```
-_分析： 这个错误的提示跟这个错误的根本原因没有更新, 需注意_ 
-
-
-### 真实原因是： 
-**订阅了一个未授权订阅的topic。** 
-### 解决方案 
-**更新授权证书关联的Policy, 将这个topic增加到订阅里面去**
-
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "iot:Publish",
-        "iot:Receive"
-      ],
-      "Resource": [
-        "arn:aws:iot:ap-southeast-1:390468416359:topic/sdk/test/java",
-        "arn:aws:iot:ap-southeast-1:390468416359:topic/sdk/test/python",
-        "arn:aws:iot:ap-southeast-1:390468416359:topic/sdk/test/js",
-        "arn:aws:iot:ap-southeast-1:390468416359:topic/$aws/things/zg_d1/tunnels/notify" // 这一行 必须授予这个主题订阅的权限
-      ]
-    },
-    {
-      "Effect": "Allow",
-      "Action": "iot:Subscribe",
-      "Resource": [
-        "arn:aws:iot:ap-southeast-1:390468416359:topicfilter/sdk/test/java",
-        "arn:aws:iot:ap-southeast-1:390468416359:topicfilter/sdk/test/python",
-        "arn:aws:iot:ap-southeast-1:390468416359:topicfilter/sdk/test/js",
-        "arn:aws:iot:ap-southeast-1:390468416359:topicfilter/$aws/things/zg_d1/tunnels/notify" // 这一行 必须授予这个主题订阅的权限
-      ]
-    },
-    {
-      "Effect": "Allow",
-      "Action": "iot:Connect",
-      "Resource": [
-        "arn:aws:iot:ap-southeast-1:390468416359:client/sdk-java",
-        "arn:aws:iot:ap-southeast-1:390468416359:client/basicPubSub",
-        "arn:aws:iot:ap-southeast-1:390468416359:client/sdk-nodejs-*",
-        "arn:aws:iot:ap-southeast-1:390468416359:client/pi-*"
-      ]
-    }
-  ]
-}
-
-
-```
 
 ## 树莓派编译localproxy
 
