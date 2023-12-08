@@ -90,28 +90,24 @@ public class SSHTunnelTopicListener implements Runnable {
 
     public static void logProcess(Process localProxyProcess) throws IOException {
         try (InputStreamReader isr = new InputStreamReader(localProxyProcess.getInputStream())) {
-            int c;
-            StringBuffer buffer = new StringBuffer();
-            while ((c = isr.read()) >= 0) {
-                if (NEW_LINE_CHAR == c) {
-                    log.debug("---localproxy--->>> " + buffer.toString());
-                    buffer = new StringBuffer();
-                } else {
-                    buffer.append((char) c);
-                }
-            }
+            printStream(isr, "input");
         }
 
         try (InputStreamReader isr = new InputStreamReader(localProxyProcess.getErrorStream())) {
-            int c;
-            StringBuffer buffer = new StringBuffer();
-            while ((c = isr.read()) >= 0) {
-                if (NEW_LINE_CHAR == c) {
-                    log.debug("---localproxy error--->>> " + buffer.toString());
-                    buffer = new StringBuffer();
-                } else {
-                    buffer.append((char) c);
-                }
+            printStream(isr, "error");
+        }
+    }
+
+    private static void printStream(InputStreamReader isr, String prefix) throws IOException {
+        int c;
+        StringBuffer buffer = new StringBuffer();
+        while ((c = isr.read()) >= 0) {
+            if (NEW_LINE_CHAR == c) {
+                System.out.println("---localproxy[" + prefix + "]--->>> " + buffer.toString());
+                System.out.flush();
+                buffer = new StringBuffer();
+            } else {
+                buffer.append((char) c);
             }
         }
     }
