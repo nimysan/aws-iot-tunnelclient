@@ -76,7 +76,7 @@ public class SSHTunnelTopicListener implements Runnable {
 
             // Start the destination local proxy in a separate process to connect to the SSH Daemon listening port 22
 //            String localproxy_path = System.getenv("localproxy_path");
-            final ProcessBuilder pb = new ProcessBuilder("localproxy", "-t", accessToken, "-r", region, "-d", "localhost:22", "-v 5");
+            final ProcessBuilder pb = new ProcessBuilder("localproxy", "-t", accessToken, "-r", region, "-d", "localhost:22", "-v", "5");
             log.info("command - ");
             log.info(pb.command().stream().reduce((s, s2) -> s + " " + s2));
             Process localProxyProcess = pb.start();
