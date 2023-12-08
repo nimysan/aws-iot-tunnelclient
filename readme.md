@@ -123,7 +123,11 @@ arena.cc:(.text+0xa60): undefined reference to `__atomic_fetch_add_8'
 >解决: cmake的时候， 加上 cmake _-DCMAKE_SHARED_LINKER_FLAGS='-latomic'_ ../
 
 ## 其他参考
+
 [安装cmake 3.10](https://www.matbra.com/2017/12/07/install-cmake-on-aws-linux.html)
+
 [IoT Core常用的topic名称](https://docs.aws.amazon.com/iot/latest/developerguide/reserved-topics.html#reserved-topics-secure)
+
 [Iot Java SDK](https://docs.aws.amazon.com/iot/latest/developerguide/iot-sdks.html)
+
 [预留的主题](https://docs.aws.amazon.com/zh_cn/iot/latest/developerguide/reserved-topics.html#reserved-topics-secure)
